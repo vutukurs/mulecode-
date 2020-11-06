@@ -49,7 +49,7 @@ output application/json
   {
     "id" : firstinput.id ,
     "firstName": firstinput.first_name ,
-    thePrice: firstinput.last_name,
+    "lastname": firstinput.last_name,
     (secondinput filter  ($.id==firstinput.id) map (secondinput) -> {
       "MarksBySubjectWise" : {"Maths":secondinput.score[0],
       	"English":secondinput.score[1],
