@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="naturalnumbersFlow" doc:id="5252578a-302b-4d24-aba0-43cf58fd1fd9" >
+		<http:listener doc:name="Listener" doc:id="a54f87dc-ac3e-4d1b-8b29-e852c8a60b3b" config-ref="HTTP_Listener_config" path="/number/{num}"/>
+		<set-variable value="#[attributes.uriParams.num]" doc:name="Set Variable" doc:id="5536a96a-4916-429a-8a83-b606768cdb21" variableName="uri"/>
+		<ee:transform doc:name="Transform Message" doc:id="93fab2bd-f77d-422b-a020-554f6424d6ea" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+fun getArrayList(list:Array, size:Number) = 
+if(sizeOf(list) >= size) list 
+else getArrayList(list ++ [(sizeOf(list)+1) as Number],size) 
+output application/json
+---
+getArrayList([],vars.uri as Number)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="8ab14a72-32b8-44af-b65b-36b62cacd401" message="#payload"/>
+	</flow>
+</mule>

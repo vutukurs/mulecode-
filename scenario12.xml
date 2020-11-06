@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2e954da9-b7ea-4263-903f-f6afb077a68c" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<vm:config name="VM_Config" doc:name="VM Config" doc:id="ca4b5e84-151f-4c73-ba21-1a0e8875eaa6" >
+		<vm:queues >
+			<vm:queue queueName="test" />
+		</vm:queues>
+	</vm:config>
+	<flow name="scenario1" doc:id="48b3eb58-4410-4ec1-aa94-3468e909fd68" >
+		<http:listener doc:name="Listener" doc:id="23540a3a-a57c-42f5-a846-0c479cbaa15d" config-ref="HTTP_Listener_config" path="/code1" outputMimeType="application/json" allowedMethods="POST">
+			<http:response statusCode="201" />
+		</http:listener>
+		<ee:transform doc:name="Transform Message" doc:id="3319fc43-b603-40dd-8778-04fd67aeb2cc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+lookup('scenario2', payload)
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="fb9488b7-395f-4d64-8d98-7fdffa77ffae" message="#[payload]"/>
+	</flow>
+	<flow name="scenario2" doc:id="45e30b0a-0838-4a9e-9371-0347639219cd" >
+		<ee:transform doc:name="Transform Message" doc:id="1406d400-91ea-4457-a709-6fc1b17c3f10" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+payload.employee.first_name ++ ' ' ++ payload.employee.last_name ++ 
+" was created successfully." ++ '(Employee ID : ' ++ payload.employee.id ++ ')']]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

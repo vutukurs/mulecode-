@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="scenario42" doc:id="bcf5eee6-9689-46d7-a798-1ca444b46369" >
+		<http:listener doc:name="Listener" doc:id="2412a6d6-571f-45a6-8da4-ed69d0b1d635" config-ref="HTTP_Listener_config" path="/mulinput" allowedMethods="POST" outputMimeType="application/json"/>
+		<ee:transform doc:name="Transform Message" doc:id="a30b5a46-1301-4dd6-892f-6e53f124f08c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+var firstinput = payload.employee
+var secondinput = payload.scoreBoard
+output application/json
+---
+"certificate" : firstinput map (firstinput) ->
+  {
+    "id" : firstinput.id ,
+    "firstName": firstinput.first_name ,
+    "lastname": firstinput.last_name,
+    (secondinput filter  ($.id==firstinput.id) map (secondinput) -> {
+      "MarksBySubjectWise" : {"Maths":secondinput.score[0],
+      	"English":secondinput.score[1],
+      	"Arts":secondinput.score[2],
+      	"Drawings":secondinput.score[3] 
+   
+      } 
+    }) 
+  } ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="c2bb1060-a949-4777-b796-46bba44ba68b" message="#[payload]" />
+	</flow>
+	<flow name="scenario41" doc:id="44f4d860-e32d-4201-9bad-901f39a11f1f" >
+		<http:listener doc:name="Copy_of_Listener" doc:id="7ec8d149-97e4-43f8-a80a-debe0e6854cc" config-ref="HTTP_Listener_config" path="/mulinput2" outputMimeType="application/json" allowedMethods="POST" />
+		<set-variable value="#[payload.employee]" doc:name="Copy_of_Set Variable" doc:id="79b152ff-75c2-410e-b9b9-3d4443bc116d" variableName="employee" />
+		<set-variable value="#[payload.scoreBoard]" doc:name="Copy_of_Set Variable" doc:id="d3dde81f-d883-4c00-af31-85150aeac237" variableName="scoreboard" />
+		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="d39ab038-5b71-4eda-b899-9e205eeec0c5" message="#[vars.scoreboard] " />
+		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="604c2a5e-7063-4bf9-bbe6-be608d6a050b" message="#[vars.employee]" />
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="105c4467-d4ce-4ca4-a104-092a7e061a66" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+var firstinput = payload.employee
+var secondinput = payload.scoreBoard
+output application/json
+---
+"certificate" : firstinput map (firstinput) ->
+  {
+    "id" : firstinput.id ,
+    "firstName": firstinput.first_name ,
+    thePrice: firstinput.last_name,
+    (secondinput filter  ($.id==firstinput.id) map (secondinput) -> {
+      "MarksBySubjectWise" : {"Maths":secondinput.score[0],
+      	"English":secondinput.score[1],
+      	"Arts":secondinput.score[2],
+      	"Drawings":secondinput.score[3] 
+   
+      } 
+    }) 
+  } ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="be1c1304-a094-4b8b-9558-8ff5e140cb70" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.certificate filter (value,index) -> (value.MarksBySubjectWise != null )]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
